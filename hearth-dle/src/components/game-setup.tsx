@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Card } from "@radix-ui/themes";
-// import { Sparkles, Swords, BookOpen, Play } from "lucide-react";
 
 type GameMode = "classic" | "wild" | "custom";
 
