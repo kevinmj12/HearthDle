@@ -1,10 +1,10 @@
-import { GameSetup } from "@/components/game-setup";
+import { MainPage } from "@/components/main-page/main-page";
 import { Theme } from "@radix-ui/themes";
 
 export default function Home() {
   return (
     <Theme>
-      <GameSetup />
+      <MainPage />
     </Theme>
   );
 }
