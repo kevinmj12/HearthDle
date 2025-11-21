@@ -1,9 +1,8 @@
 import { GameMode } from "@/app/types/game-mode";
-import { Card } from "@radix-ui/themes";
-import standardImg from "@/app/assets/icons/standard.svg";
-import wildImg from "@/app/assets/icons/wild.svg";
-import customImg from "@/app/assets/icons/custom.svg";
+import { modeNames } from "@/data/mode-info/mode-names";
+
 import Image from "next/image";
+import { FaRegQuestionCircle } from "react-icons/fa";
 
 interface ModeCardProps {
   gameMode: GameMode;
@@ -18,30 +17,26 @@ export function ModeCard({
   selectedMode,
   setSelectedMode,
 }: ModeCardProps) {
-  const modeNames: Record<GameMode, { name: string; img: string }> = {
-    standard: { name: "정규", img: standardImg },
-    wild: { name: "야생", img: wildImg },
-    custom: { name: "커스텀", img: customImg },
-  };
-
   return (
-    <Card
-      className={`p-6 cursor-pointer transition-all hover:border-accent ${
+    <div
+      className={`p-6 cursor-pointer transition-all ${
         selectedMode === gameMode
-          ? "border-accent border-2 bg-accent/10"
-          : "border-border"
+          ? "border-accent border-3 bg-accent/10"
+          : "hover:border-2"
       }`}
       onClick={() => setSelectedMode(gameMode)}
     >
       <div className="flex flex-col items-center text-center space-y-3">
         <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-          <Image src={modeNames[gameMode].img} alt={modeNames[gameMode].name} />
+          <Image
+            src={modeNames[gameMode].img}
+            alt={modeNames[gameMode].name}
+            className="bg-none"
+          />
         </div>
-        <h3 className="text-xl font-bold text-foreground">
-          {modeNames[gameMode].name}
-        </h3>
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <h3 className="text-2xl font-bold">{modeNames[gameMode].name}</h3>
+        <p className="text-l text-muted-foreground">{description}</p>
       </div>
-    </Card>
+    </div>
   );
 }
