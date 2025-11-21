@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Card } from "@radix-ui/themes";
 import { cardSets } from "@/data/card-sets/card-sets";
 import { GameMode } from "@/app/types/game-mode";
 import { ModeCard } from "./mode-card";
+import Image from "next/image";
+import headerTop from "@/app/assets/images/doldle-header-top.png";
+import headerMiddle from "@/app/assets/images/doldle-header-middle.jpg";
+import headerBottom from "@/app/assets/images/doldle-header-bottom.png";
 
 export function MainPage() {
   const [selectedMode, setSelectedMode] = useState<GameMode>("standard");
@@ -54,27 +57,33 @@ export function MainPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="w-full mt-8">
       {/* Header */}
-      <div className="text-center mb-12">
-        <h1 className="">DolDle</h1>
-        <p className="text-muted-foreground text-lg">
-          Choose your game mode and start making decisions
-        </p>
+      <div className="text-center mb-20 bg-[url('/images/doldle-header-middle.jpg')]">
+        <Image src={headerTop} alt="top" className="relative w-full h-16" />
+        <h1 className="text-5xl text-white mb-7">DolDle</h1>
+        <p className="text-2xl text-white">하스스톤 카드를 맞혀보세요!</p>
+        <Image
+          src={headerBottom}
+          alt="bottom"
+          className="relative w-full h-16"
+        />
       </div>
 
       {/* Mode Selection */}
-      <div className="mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {modes.map((mode) => (
-            <ModeCard
-              key={mode.gameMode}
-              gameMode={mode.gameMode}
-              description={mode.description}
-              selectedMode={selectedMode}
-              setSelectedMode={setSelectedMode}
-            />
-          ))}
+      <div className="container px-4 mx-auto max-w-5xl">
+        <div className="mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {modes.map((mode) => (
+              <ModeCard
+                key={mode.gameMode}
+                gameMode={mode.gameMode}
+                description={mode.description}
+                selectedMode={selectedMode}
+                setSelectedMode={setSelectedMode}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>

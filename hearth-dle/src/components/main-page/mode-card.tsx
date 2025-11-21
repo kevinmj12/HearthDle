@@ -1,8 +1,8 @@
 import { GameMode } from "@/app/types/game-mode";
 import { Card } from "@radix-ui/themes";
-import standardImg from "@/app/assets/images/standard.svg";
-import wildImg from "@/app/assets/images/wild.svg";
-import customImg from "@/app/assets/images/custom.svg";
+import standardImg from "@/app/assets/icons/standard.svg";
+import wildImg from "@/app/assets/icons/wild.svg";
+import customImg from "@/app/assets/icons/custom.svg";
 import Image from "next/image";
 
 interface ModeCardProps {

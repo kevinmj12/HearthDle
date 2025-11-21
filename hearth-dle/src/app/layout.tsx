@@ -2,6 +2,24 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import localFont from "next/font/local";
+
+const godo = localFont({
+  src: [
+    {
+      path: "./assets/fonts/GodoB.ttf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./assets/fonts/GodoM.ttf",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+  variable: "--font-godo",
+});
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -24,11 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body className={`${godo.variable}`}>{children}</body>
     </html>
   );
 }
