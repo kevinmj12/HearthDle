@@ -11,10 +11,28 @@ import headerBottom from "@/app/assets/images/doldle-header-bottom.png";
 import { modeNames } from "@/data/mode-info/mode-names";
 import { FaRegQuestionCircle } from "react-icons/fa";
 
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "../ui/button";
+import { LuBookOpen, LuPlay } from "react-icons/lu";
+
 export function MainPage() {
   const [selectedMode, setSelectedMode] = useState<GameMode>("standard");
-  const [selectedCardSets, setSelectedCardSets] = useState<string[]>(
-    classicCardSets.map((e) => e.name)
+  const [selectedCardSets, setSelectedCardSets] = useState<
+    { id: number; name: string }[]
+  >(
+    classicCardSets.map((e) => ({
+      id: e.id,
+      name: e.name,
+    }))
   );
   const [customDialogOpen, setCustomDialogOpen] = useState(false);
   const [cardSetsDialogOpen, setCardSetsDialogOpen] = useState(false);
@@ -54,9 +72,13 @@ export function MainPage() {
     setSelectedMode(mode);
     if (mode === "standard") {
       setSelectedMode("standard");
-      setSelectedCardSets(classicCardSets.map((e) => e.name));
+      setSelectedCardSets(
+        classicCardSets.map((e) => ({ id: e.id, name: e.name }))
+      );
     } else if (mode === "wild") {
-      setSelectedCardSets(wildCardSets.map((e) => e.name));
+      setSelectedCardSets(
+        wildCardSets.map((e) => ({ id: e.id, name: e.name }))
+      );
     } else if (mode === "custom") {
       setCustomDialogOpen(true);
     }
@@ -97,11 +119,56 @@ export function MainPage() {
         </div>
       </div>
 
+      {/* 놀이 방법, 게임 시작 */}
+      <div className="flex flex-row justify-center items-center mt-12 text-[#614326] gap-8">
+        <div className="flex flex-row gap-3 items-center text-2xl cursor-pointer border-2 rounded-md px-4 py-3">
+          <LuBookOpen />
+          게임 방법
+        </div>
+        <div className="flex flex-row gap-3 items-center text-2xl cursor-pointer border-2 border-[#581c0d] rounded-md px-4 py-3 bg-[#581c0d] text-white">
+          <LuPlay />
+          게임 시작
+        </div>
+      </div>
+
       {/* 선택된 모드 안내 */}
       <div className="flex flex-row justify-center items-center mt-12 text-2xl text-[#614326]">
         <p>모드: {modeNames[selectedMode].name}</p>
         <p className="ml-8">확장팩: {selectedCardSets.length}개 선택됨</p>
-        <FaRegQuestionCircle className="ml-2" />
+        <Dialog>
+          <form>
+            <DialogTrigger asChild>
+              <FaRegQuestionCircle className="ml-2 cursor-pointer" />
+            </DialogTrigger>
+
+            <DialogContent className="sm:max-w-[500px] max-h-[400px] bg-white p-0 flex flex-col">
+              {/* Header - 고정 */}
+              <DialogHeader className="pl-6 pt-6 pb-3">
+                <DialogTitle>
+                  {selectedCardSets.length}개의 확장팩이 선택되었습니다!
+                </DialogTitle>
+              </DialogHeader>
+
+              {/* 가운데 스크롤 영역 */}
+              <div className="flex-1 px-5 overflow-y-auto">
+                <ul className="list-disc px-5 flex flex-col gap-3">
+                  {selectedCardSets.map((e) => (
+                    <li key={e.id}>{e.name}</li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Footer - 고정 */}
+              <DialogFooter className="pr-6 pb-6 pt-3">
+                <DialogClose asChild>
+                  <Button className="cursor-pointer border-2 border-[#e5e5e5]">
+                    확인
+                  </Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </form>
+        </Dialog>
       </div>
     </div>
   );
