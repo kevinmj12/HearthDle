@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { classicCardSets } from "@/data/card-sets/classic-card-sets";
 import { wildCardSets } from "@/data/card-sets/wild-card-sets";
 import { GameMode } from "@/app/types/game-mode";
 import { ModeCard } from "./mode-card";
@@ -15,7 +14,6 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -25,17 +23,18 @@ import { Button } from "../ui/button";
 import { LuBookOpen, LuPlay } from "react-icons/lu";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
+import useCardSetsStore from "@/stores/card-sets-store";
 
 export function MainPage() {
+  const {
+    selectedCardSets,
+    toggleSelectedCardSets,
+    removeSelectedCardSets,
+    setSelectedCardSetsStandard,
+    setSelectedCardSetsWild,
+    sortSelectedCardSets,
+  } = useCardSetsStore();
   const [selectedMode, setSelectedMode] = useState<GameMode>("standard");
-  const [selectedCardSets, setSelectedCardSets] = useState<
-    { id: number; name: string }[]
-  >(
-    classicCardSets.map((e) => ({
-      id: e.id,
-      name: e.name,
-    }))
-  );
 
   const modes: { gameMode: GameMode; description: string }[] = [
     {
@@ -56,14 +55,11 @@ export function MainPage() {
     setSelectedMode(mode);
     if (mode === "standard") {
       setSelectedMode("standard");
-      setSelectedCardSets(
-        classicCardSets.map((e) => ({ id: e.id, name: e.name }))
-      );
+      setSelectedCardSetsStandard();
     } else if (mode === "wild") {
-      setSelectedCardSets(
-        wildCardSets.map((e) => ({ id: e.id, name: e.name }))
-      );
+      setSelectedCardSetsWild();
     } else if (mode === "custom") {
+      removeSelectedCardSets(2); // 핵심 id 제거
     }
   };
 
@@ -112,7 +108,6 @@ export function MainPage() {
                     </div>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[500px] max-h-[600px] bg-white p-0 flex flex-col">
-                    {/* Header - 고정 */}
                     <DialogHeader className="pl-6 pt-6">
                       <DialogTitle>원하는 확장팩을 선택하세요!</DialogTitle>
                     </DialogHeader>
@@ -120,23 +115,37 @@ export function MainPage() {
                     {/* 가운데 스크롤 영역 */}
                     <div className="flex-1 px-6 py-2 overflow-y-auto">
                       <ul className="list-disc flex flex-col gap-5">
-                        {wildCardSets.map((e) => (
-                          <div key={e.id} className="flex items-center gap-3">
-                            <Checkbox id={e.name} />
-                            <Label htmlFor={e.name} className="text-[16px]">
-                              {e.name}
-                            </Label>
-                          </div>
-                        ))}
+                        {wildCardSets.map((e) => {
+                          const isChecked = selectedCardSets.some(
+                            (c) => c.id === e.id
+                          );
+                          return (
+                            <div key={e.id} className="flex items-center gap-3">
+                              <Checkbox
+                                id={e.name}
+                                checked={isChecked}
+                                onCheckedChange={() =>
+                                  toggleSelectedCardSets(e.id)
+                                }
+                              />
+                              <Label htmlFor={e.name} className="text-[16px]">
+                                {e.name}
+                              </Label>
+                            </div>
+                          );
+                        })}
                       </ul>
                     </div>
 
-                    {/* Footer - 고정 */}
                     <DialogFooter className="px-6 pb-6">
                       <DialogClose asChild>
-                        <Button variant="ghost">취소</Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => sortSelectedCardSets()}
+                        >
+                          확인
+                        </Button>
                       </DialogClose>
-                      <Button variant="ghost">저장</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -152,7 +161,7 @@ export function MainPage() {
           <LuBookOpen />
           게임 방법
         </div>
-        <div className="flex flex-row gap-3 items-center cursor-pointer hover:bg-[#ad4a32] border-2 border-[#8e2a11] rounded-md px-4 py-3 bg-[#8e2a11] text-white">
+        <div className="flex flex-row gap-3 items-center cursor-pointer hover:border-[#ad4a32] hover:bg-[#ad4a32] border-2 border-[#8e2a11] rounded-md px-4 py-3 bg-[#8e2a11] text-white">
           <LuPlay />
           게임 시작
         </div>
@@ -185,7 +194,7 @@ export function MainPage() {
 
             <DialogFooter className="px-6 pb-6">
               <DialogClose asChild>
-                <Button variant="ghost">취소</Button>
+                <Button variant="ghost">확인</Button>
               </DialogClose>
             </DialogFooter>
           </DialogContent>

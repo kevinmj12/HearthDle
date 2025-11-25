@@ -1,4 +1,6 @@
-export const classicCardSets: { id: number; name: string }[] = [
+import { TCardSets } from "@/stores/card-sets-store";
+
+export const standardCardSets: TCardSets[] = [
   { id: 2, name: "핵심" },
   { id: 3, name: "이벤트" },
   { id: 37, name: "위즈뱅의 장난감 공방" },
