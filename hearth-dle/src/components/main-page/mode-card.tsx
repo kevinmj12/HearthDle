@@ -19,20 +19,14 @@ export function ModeCard({
 }: ModeCardProps) {
   return (
     <div
-      className={`p-6 cursor-pointer transition-all ${
-        selectedMode === gameMode
-          ? "border-accent border-3 bg-accent/10"
-          : "hover:border-2"
+      className={`p-6 cursor-pointer transition-all border-[#614326] ${
+        selectedMode === gameMode ? "border-3 bg-accent/10" : "hover:border-2"
       }`}
       onClick={() => setSelectedMode(gameMode)}
     >
       <div className="flex flex-col items-center text-center space-y-3">
-        <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-          <Image
-            src={modeNames[gameMode].img}
-            alt={modeNames[gameMode].name}
-            className="bg-none"
-          />
+        <div className="h-12 w-12 rounded-full  flex items-center justify-center">
+          <Image src={modeNames[gameMode].img} alt={modeNames[gameMode].name} />
         </div>
         <h3 className="text-2xl font-bold">{modeNames[gameMode].name}</h3>
         <p className="text-l text-muted-foreground">{description}</p>

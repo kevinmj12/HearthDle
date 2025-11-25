@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
 import { LuBookOpen, LuPlay } from "react-icons/lu";
+import { Checkbox } from "../ui/checkbox";
+import { Label } from "../ui/label";
 
 export function MainPage() {
   const [selectedMode, setSelectedMode] = useState<GameMode>("standard");
@@ -34,8 +36,6 @@ export function MainPage() {
       name: e.name,
     }))
   );
-  const [customDialogOpen, setCustomDialogOpen] = useState(false);
-  const [cardSetsDialogOpen, setCardSetsDialogOpen] = useState(false);
 
   const modes: { gameMode: GameMode; description: string }[] = [
     {
@@ -52,22 +52,6 @@ export function MainPage() {
     },
   ];
 
-  // const handleSeriesToggle = (seriesId: string) => {
-  //   setSelectedSeries((prev) =>
-  //     prev.includes(seriesId)
-  //       ? prev.filter((id) => id !== seriesId)
-  //       : [...prev, seriesId]
-  //   );
-  // };
-
-  // const handleSelectAll = () => {
-  //   setSelectedSeries(cardSets.map((s) => s.name));
-  // };
-
-  // const handleRemoveAll = () => {
-  //   setSelectedSeries([]);
-  // };
-
   const handleModeSelect = (mode: GameMode) => {
     setSelectedMode(mode);
     if (mode === "standard") {
@@ -80,12 +64,11 @@ export function MainPage() {
         wildCardSets.map((e) => ({ id: e.id, name: e.name }))
       );
     } else if (mode === "custom") {
-      setCustomDialogOpen(true);
     }
   };
 
   return (
-    <div className="w-full mt-8">
+    <div className="w-full my-8">
       {/* 헤더 */}
       <div className="text-center mb-20 bg-[url('/images/doldle-header-middle.jpg')]">
         <Image
@@ -106,26 +89,70 @@ export function MainPage() {
       <div className="container px-4 mx-auto max-w-5xl text-[#614326]">
         <div className="mb-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {modes.map((mode) => (
-              <ModeCard
-                key={mode.gameMode}
-                gameMode={mode.gameMode}
-                description={mode.description}
-                selectedMode={selectedMode}
-                setSelectedMode={handleModeSelect}
-              />
-            ))}
+            {modes.map((mode) =>
+              mode.gameMode !== "custom" ? (
+                <ModeCard
+                  key={mode.gameMode}
+                  gameMode={mode.gameMode}
+                  description={mode.description}
+                  selectedMode={selectedMode}
+                  setSelectedMode={handleModeSelect}
+                />
+              ) : (
+                <Dialog key={mode.gameMode}>
+                  <DialogTrigger asChild>
+                    <div>
+                      <ModeCard
+                        key={mode.gameMode}
+                        gameMode={mode.gameMode}
+                        description={mode.description}
+                        selectedMode={selectedMode}
+                        setSelectedMode={handleModeSelect}
+                      />
+                    </div>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px] max-h-[600px] bg-white p-0 flex flex-col">
+                    {/* Header - 고정 */}
+                    <DialogHeader className="pl-6 pt-6">
+                      <DialogTitle>원하는 확장팩을 선택하세요!</DialogTitle>
+                    </DialogHeader>
+
+                    {/* 가운데 스크롤 영역 */}
+                    <div className="flex-1 px-6 py-2 overflow-y-auto">
+                      <ul className="list-disc flex flex-col gap-5">
+                        {wildCardSets.map((e) => (
+                          <div key={e.id} className="flex items-center gap-3">
+                            <Checkbox id={e.name} />
+                            <Label htmlFor={e.name} className="text-[16px]">
+                              {e.name}
+                            </Label>
+                          </div>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Footer - 고정 */}
+                    <DialogFooter className="px-6 pb-6">
+                      <DialogClose asChild>
+                        <Button variant="ghost">취소</Button>
+                      </DialogClose>
+                      <Button variant="ghost">저장</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+              )
+            )}
           </div>
         </div>
       </div>
 
       {/* 놀이 방법, 게임 시작 */}
-      <div className="flex flex-row justify-center items-center mt-12 text-[#614326] gap-8">
-        <div className="flex flex-row gap-3 items-center text-2xl cursor-pointer border-2 rounded-md px-4 py-3">
+      <div className="flex flex-row justify-center items-center mt-12 text-[#614326] text-xl gap-8">
+        <div className="flex flex-row gap-3 items-center cursor-pointer hover:bg-accent/20 border-2 border-[#614326] rounded-md px-4 py-3">
           <LuBookOpen />
           게임 방법
         </div>
-        <div className="flex flex-row gap-3 items-center text-2xl cursor-pointer border-2 border-[#581c0d] rounded-md px-4 py-3 bg-[#581c0d] text-white">
+        <div className="flex flex-row gap-3 items-center cursor-pointer hover:bg-[#ad4a32] border-2 border-[#8e2a11] rounded-md px-4 py-3 bg-[#8e2a11] text-white">
           <LuPlay />
           게임 시작
         </div>
@@ -136,38 +163,32 @@ export function MainPage() {
         <p>모드: {modeNames[selectedMode].name}</p>
         <p className="ml-8">확장팩: {selectedCardSets.length}개 선택됨</p>
         <Dialog>
-          <form>
-            <DialogTrigger asChild>
-              <FaRegQuestionCircle className="ml-2 cursor-pointer" />
-            </DialogTrigger>
+          <DialogTrigger asChild>
+            <FaRegQuestionCircle className="ml-2 cursor-pointer" />
+          </DialogTrigger>
 
-            <DialogContent className="sm:max-w-[500px] max-h-[400px] bg-white p-0 flex flex-col">
-              {/* Header - 고정 */}
-              <DialogHeader className="pl-6 pt-6 pb-3">
-                <DialogTitle>
-                  {selectedCardSets.length}개의 확장팩이 선택되었습니다!
-                </DialogTitle>
-              </DialogHeader>
+          <DialogContent className="sm:max-w-[500px] max-h-[350px] bg-white p-0 flex flex-col">
+            <DialogHeader className="pl-6 pt-6">
+              <DialogTitle>
+                {selectedCardSets.length}개의 확장팩이 선택되었습니다!
+              </DialogTitle>
+            </DialogHeader>
 
-              {/* 가운데 스크롤 영역 */}
-              <div className="flex-1 px-5 overflow-y-auto">
-                <ul className="list-disc px-5 flex flex-col gap-3">
-                  {selectedCardSets.map((e) => (
-                    <li key={e.id}>{e.name}</li>
-                  ))}
-                </ul>
-              </div>
+            {/* 가운데 스크롤 영역 */}
+            <div className="flex-1 px-5 overflow-y-auto">
+              <ul className="list-disc py-2 px-5 flex flex-col gap-3">
+                {selectedCardSets.map((e) => (
+                  <li key={e.id}>{e.name}</li>
+                ))}
+              </ul>
+            </div>
 
-              {/* Footer - 고정 */}
-              <DialogFooter className="pr-6 pb-6 pt-3">
-                <DialogClose asChild>
-                  <Button className="cursor-pointer border-2 border-[#e5e5e5]">
-                    확인
-                  </Button>
-                </DialogClose>
-              </DialogFooter>
-            </DialogContent>
-          </form>
+            <DialogFooter className="px-6 pb-6">
+              <DialogClose asChild>
+                <Button variant="ghost">취소</Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
         </Dialog>
       </div>
     </div>
