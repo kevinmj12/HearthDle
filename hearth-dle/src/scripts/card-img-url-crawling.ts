@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import fs from "fs-extra";
 import path from "path";
-import { HearthstoneCard } from "@/cards";
+import { HearthstoneCard } from "@/data/cards/cards";
 
 const OUTPUT_JSON = path.join(__dirname, "../cards.json");
 
