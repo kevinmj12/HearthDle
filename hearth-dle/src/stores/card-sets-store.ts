@@ -8,6 +8,7 @@ interface CardSetsStore {
   selectedCardSets: TCardSets[];
   toggleSelectedCardSets: (id: number) => void;
   removeSelectedCardSets: (id: number) => void;
+  removeAllCardSets: () => void;
   setSelectedCardSetsStandard: () => void;
   setSelectedCardSetsWild: () => void;
   sortSelectedCardSets: () => void;
@@ -38,6 +39,11 @@ const useCardSetsStore = create<CardSetsStore>((set, get) => ({
     const { selectedCardSets } = get();
     set({
       selectedCardSets: selectedCardSets.filter((c) => c.id !== id),
+    });
+  },
+  removeAllCardSets: () => {
+    set({
+      selectedCardSets: [],
     });
   },
   setSelectedCardSetsStandard: () =>

@@ -30,6 +30,7 @@ export function MainPage() {
     selectedCardSets,
     toggleSelectedCardSets,
     removeSelectedCardSets,
+    removeAllCardSets,
     setSelectedCardSetsStandard,
     setSelectedCardSetsWild,
     sortSelectedCardSets,
@@ -137,7 +138,22 @@ export function MainPage() {
                       </ul>
                     </div>
 
-                    <DialogFooter className="px-6 pb-6">
+                    <div className="px-6 pb-6 flex justify-between">
+                      <div className="flex gap-3 items-center">
+                        <Button
+                          variant="outline"
+                          onClick={() => setSelectedCardSetsWild()}
+                        >
+                          전체 선택
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => removeAllCardSets()}
+                        >
+                          전체 해제
+                        </Button>
+                        <p>{selectedCardSets.length}개 선택됨</p>
+                      </div>
                       <DialogClose asChild>
                         <Button
                           variant="ghost"
@@ -146,7 +162,7 @@ export function MainPage() {
                           확인
                         </Button>
                       </DialogClose>
-                    </DialogFooter>
+                    </div>
                   </DialogContent>
                 </Dialog>
               )
