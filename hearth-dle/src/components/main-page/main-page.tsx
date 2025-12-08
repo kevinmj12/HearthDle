@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { wildCardSets } from "@/data/card-sets/wild-card-sets";
-import { GameMode } from "@/app/types/game-mode";
+import { GameMode } from "@/types/game-mode";
 import { ModeCard } from "./mode-card";
 import Image from "next/image";
-import headerTop from "@/app/assets/images/doldle-header-top.png";
-import headerBottom from "@/app/assets/images/doldle-header-bottom.png";
+import headerTop from "@/assets/images/doldle-header-top.png";
+import headerBottom from "@/assets/images/doldle-header-bottom.png";
 import { modeNames } from "@/data/mode-info/mode-names";
 import { FaRegQuestionCircle } from "react-icons/fa";
 
@@ -24,8 +24,11 @@ import { LuBookOpen, LuPlay } from "react-icons/lu";
 import { Checkbox } from "../ui/checkbox";
 import { Label } from "../ui/label";
 import useCardSetsStore from "@/stores/card-sets-store";
+import { useRouter } from "next/navigation";
 
 export function MainPage() {
+  const router = useRouter();
+
   const {
     selectedCardSets,
     toggleSelectedCardSets,
@@ -177,7 +180,11 @@ export function MainPage() {
           <LuBookOpen />
           게임 방법
         </div>
-        <div className="flex flex-row gap-3 items-center cursor-pointer hover:border-[#ad4a32] hover:bg-[#ad4a32] border-2 border-[#8e2a11] rounded-md px-4 py-3 bg-[#8e2a11] text-white">
+
+        <div
+          className="flex flex-row gap-3 items-center cursor-pointer hover:border-[#ad4a32] hover:bg-[#ad4a32] border-2 border-[#8e2a11] rounded-md px-4 py-3 bg-[#8e2a11] text-white"
+          onClick={() => router.push("/play")}
+        >
           <LuPlay />
           게임 시작
         </div>

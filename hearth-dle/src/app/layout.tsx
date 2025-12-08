@@ -7,12 +7,12 @@ import localFont from "next/font/local";
 const godo = localFont({
   src: [
     {
-      path: "./assets/fonts/GodoB.ttf",
+      path: "../assets/fonts/GodoB.ttf",
       weight: "600",
       style: "normal",
     },
     {
-      path: "./assets/fonts/GodoM.ttf",
+      path: "../assets/fonts/GodoM.ttf",
       weight: "400",
       style: "normal",
     },

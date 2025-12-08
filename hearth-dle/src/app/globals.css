@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background-image: url("assets/images/doldle-bg.jpg");
+  --background-image: url("@/assets/images/doldle-bg.jpg");
   --radius: 0.625rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -41,7 +41,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background-image: url("assets/images/doldle-bg.jpg");
+    --background-image: url("@/assets/images/doldle-bg.jpg");
   }
 }
 

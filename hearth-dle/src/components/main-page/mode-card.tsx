@@ -1,4 +1,4 @@
-import { GameMode } from "@/app/types/game-mode";
+import { GameMode } from "@/types/game-mode";
 import { modeNames } from "@/data/mode-info/mode-names";
 
 import Image from "next/image";
