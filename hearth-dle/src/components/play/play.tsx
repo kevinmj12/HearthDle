@@ -1,78 +1,362 @@
 "use client";
 
-import { useState } from "react";
-import { GameMode } from "@/types/game-mode";
-import { modeNames } from "@/data/mode-info/mode-names";
-import { FaRegQuestionCircle } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { AutocompleteInput } from "./auto-complete-input";
+import { Card } from "@/types/card";
+import cards from "@/data/cards/cards.json";
+import { cn } from "@/lib/utils";
+import { ChevronUp, ChevronDown, Check, Minus } from "lucide-react";
 
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Button } from "../ui/button";
-import { LuBookOpen, LuPlay } from "react-icons/lu";
-import useCardSetsStore from "@/stores/card-sets-store";
-import { useRouter } from "next/navigation";
+type HintStatus = "correct" | "wrong" | "higher" | "lower" | "partial";
+
+interface GuessResult {
+  card: Card;
+  hints: {
+    packs: HintStatus;
+    mana: HintStatus;
+    class: HintStatus;
+    attack: HintStatus;
+    health: HintStatus;
+    type: HintStatus;
+    rarity: HintStatus;
+    keywords: HintStatus;
+    minionType: HintStatus;
+    spellSchool: HintStatus;
+  };
+  isNew?: boolean;
+}
+
+function compareArrays(guessed: string[], answer: string[]): HintStatus {
+  if (guessed.length === 0 && answer.length === 0) return "correct";
+  if (guessed.length === 0 || answer.length === 0) return "wrong";
+
+  const guessedSet = new Set(guessed);
+  const answerSet = new Set(answer);
+
+  const allMatch =
+    guessed.length === answer.length &&
+    guessed.every((item) => answerSet.has(item));
+
+  if (allMatch) return "correct";
+
+  const hasPartial = guessed.some((item) => answerSet.has(item));
+  return hasPartial ? "partial" : "wrong";
+}
+
+function compareNumbers(
+  guessed: number | null,
+  answer: number | null
+): HintStatus {
+  if (guessed === null && answer === null) return "correct";
+  if (guessed === null || answer === null) return "wrong";
+  if (guessed === answer) return "correct";
+  return guessed < answer ? "higher" : "lower";
+}
+
+function HintCell({
+  value,
+  status,
+  isNumeric = false,
+  animate = false,
+}: {
+  value: string | number | null;
+  status: HintStatus;
+  isNumeric?: boolean;
+  animate?: boolean;
+}) {
+  const bgColor = {
+    correct: "bg-green-500",
+    wrong: "bg-red-500",
+    higher: "bg-amber-500",
+    lower: "bg-amber-500",
+    partial: "bg-yellow-500",
+  }[status];
+
+  const displayValue = value === null ? "-" : value;
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center p-2 rounded-lg min-w-[60px] min-h-[60px] text-white font-medium text-sm",
+        bgColor,
+        animate && "animate-in zoom-in-50 duration-300"
+      )}
+    >
+      <span className="text-center break-words">{displayValue}</span>
+      {isNumeric && status === "higher" && <ChevronUp className="w-4 h-4" />}
+      {isNumeric && status === "lower" && <ChevronDown className="w-4 h-4" />}
+      {status === "correct" && <Check className="w-4 h-4" />}
+      {status === "partial" && <Minus className="w-4 h-4" />}
+    </div>
+  );
+}
+
+function ArrayHintCell({
+  values,
+  status,
+  animate = false,
+}: {
+  values: string[];
+  status: HintStatus;
+  animate?: boolean;
+}) {
+  const bgColor = {
+    correct: "bg-green-500",
+    wrong: "bg-red-500",
+    higher: "bg-amber-500",
+    lower: "bg-amber-500",
+    partial: "bg-yellow-500",
+  }[status];
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center p-2 rounded-lg min-w-[60px] min-h-[60px] text-white font-medium text-xs",
+        bgColor,
+        animate && "animate-in zoom-in-50 duration-300"
+      )}
+    >
+      {values.length === 0 ? (
+        <span>-</span>
+      ) : (
+        <span className="text-center">{values.join(", ")}</span>
+      )}
+      {status === "correct" && <Check className="w-4 h-4 mt-1" />}
+      {status === "partial" && <Minus className="w-4 h-4 mt-1" />}
+    </div>
+  );
+}
 
 export function Play() {
-  const router = useRouter();
+  const [answer, setAnswer] = useState<Card | null>(null);
+  const [guesses, setGuesses] = useState<GuessResult[]>([]);
+  const [isWon, setIsWon] = useState(false);
+  const [usedCards, setUsedCards] = useState<Set<string>>(new Set());
 
-  const {
-    selectedCardSets,
-    removeSelectedCardSets,
-    setSelectedCardSetsStandard,
-    setSelectedCardSetsWild,
-  } = useCardSetsStore();
-  const [selectedMode, setSelectedMode] = useState<GameMode>("standard");
+  useEffect(() => {
+    startNewGame();
+  }, []);
 
-  const modes: { gameMode: GameMode; description: string }[] = [
-    {
-      gameMode: "standard",
-      description: "정규 카드들이 문제로 출제됩니다",
-    },
-    {
-      gameMode: "wild",
-      description: "야생 카드들이 문제로 출제됩니다",
-    },
-    {
-      gameMode: "custom",
-      description: "범위를 설정할 수 있습니다",
-    },
-  ];
+  useEffect(() => {
+    if (guesses.length > 0 && guesses[0]?.isNew) {
+      const timer = setTimeout(() => {
+        setGuesses((prev) =>
+          prev.map((g, i) => (i === 0 ? { ...g, isNew: false } : g))
+        );
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [guesses]);
 
-  const handleModeSelect = (mode: GameMode) => {
-    setSelectedMode(mode);
-    if (mode === "standard") {
-      setSelectedMode("standard");
-      setSelectedCardSetsStandard();
-    } else if (mode === "wild") {
-      setSelectedCardSetsWild();
-    } else if (mode === "custom") {
-      removeSelectedCardSets(2); // 핵심 id 제거
+  const startNewGame = () => {
+    const randomIndex = Math.floor(Math.random() * cards.length);
+    setAnswer(cards[randomIndex]);
+    setGuesses([]);
+    setIsWon(false);
+    setUsedCards(new Set());
+  };
+
+  const handleGuess = (cardName: string) => {
+    if (!answer || isWon) return;
+
+    const guessedCard = cards.find((c) => c.name === cardName);
+    if (!guessedCard) return;
+
+    if (usedCards.has(cardName)) return;
+    setUsedCards((prev) => new Set(prev).add(cardName));
+
+    const hints: GuessResult["hints"] = {
+      packs: guessedCard.packs === answer.packs ? "correct" : "wrong",
+      mana: compareNumbers(guessedCard.mana, answer.mana),
+      class: guessedCard.class === answer.class ? "correct" : "wrong",
+      attack: compareNumbers(guessedCard.attack, answer.attack),
+      health: compareNumbers(guessedCard.health, answer.health),
+      type: guessedCard.type === answer.type ? "correct" : "wrong",
+      rarity: guessedCard.rarity === answer.rarity ? "correct" : "wrong",
+      keywords: compareArrays(guessedCard.keywords, answer.keywords),
+      minionType: compareArrays(guessedCard.minionType, answer.minionType),
+      spellSchool: compareArrays(guessedCard.spellSchool, answer.spellSchool),
+    };
+
+    const newGuess: GuessResult = { card: guessedCard, hints, isNew: true };
+    setGuesses((prev) => [newGuess, ...prev]);
+
+    if (guessedCard.name === answer.name) {
+      setIsWon(true);
     }
   };
 
-  return (
-    <div className="w-full my-8">
-      {/* 놀이 방법, 게임 시작 */}
-      <div className="flex flex-row justify-center items-center mt-12 text-[#614326] text-xl gap-8">
-        <div className="flex flex-row gap-3 items-center cursor-pointer hover:bg-accent/20 border-2 border-[#614326] rounded-md px-4 py-3">
-          <LuBookOpen />
-          게임 방법
-        </div>
+  const availableCards = cards
+    .filter((c) => !usedCards.has(c.name))
+    .map((c) => c.name);
 
-        <div
-          className="flex flex-row gap-3 items-center cursor-pointer hover:border-[#ad4a32] hover:bg-[#ad4a32] border-2 border-[#8e2a11] rounded-md px-4 py-3 bg-[#8e2a11] text-white"
-          onClick={() => router.push("/play")}
-        >
-          <LuPlay />
-          게임 시작
+  const classNameMap: Record<string, string> = {
+    deathknight: "죽음의 기사",
+    demonhunter: "악마사냥꾼",
+    druid: "드루이드",
+    hunter: "사냥꾼",
+    mage: "마법사",
+    paladin: "성기사",
+    priest: "사제",
+    rogue: "도적",
+    shaman: "주술사",
+    warlock: "흑마법사",
+    warrior: "전사",
+    neutral: "중립",
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-6 w-full max-w-4xl mx-auto">
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
+          하스스톤 카드 맞추기
+        </h1>
+        <p className="text-muted-foreground">
+          카드 이름을 입력해서 정답 카드를 맞춰보세요!
+        </p>
+      </div>
+
+      {isWon ? (
+        <div className="flex flex-col items-center gap-4 p-6 bg-green-500/10 rounded-xl border border-green-500">
+          <h2 className="text-xl font-bold text-green-500">정답입니다!</h2>
+          <img
+            src={answer?.imagePath || "/placeholder.svg"}
+            alt={answer?.name}
+            className="w-48 rounded-lg shadow-lg"
+          />
+          <p className="text-lg font-medium">{answer?.name}</p>
+          <button
+            onClick={startNewGame}
+            className="px-6 py-2 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+          >
+            새 게임
+          </button>
         </div>
+      ) : (
+        <div className="flex flex-col items-center gap-4">
+          <AutocompleteInput
+            suggestions={availableCards}
+            placeholder="카드 이름을 입력하세요..."
+            onSelect={handleGuess}
+            clearOnSelect
+          />
+          <p className="text-sm text-muted-foreground">
+            시도 횟수: {guesses.length}
+          </p>
+        </div>
+      )}
+
+      {guesses.length > 0 && (
+        <div className="w-full overflow-x-auto">
+          <div className="flex flex-col gap-2 min-w-fit">
+            {/* Header */}
+            <div className="grid grid-cols-11 gap-2 text-xs font-medium text-muted-foreground text-center">
+              <div className="p-2">카드</div>
+              <div className="p-2">확장팩</div>
+              <div className="p-2">마나</div>
+              <div className="p-2">직업</div>
+              <div className="p-2">공격력</div>
+              <div className="p-2">체력</div>
+              <div className="p-2">유형</div>
+              <div className="p-2">희귀도</div>
+              <div className="p-2">키워드</div>
+              <div className="p-2">하수인</div>
+              <div className="p-2">주문학파</div>
+            </div>
+
+            {/* Guesses */}
+            {guesses.map((guess, index) => (
+              <div
+                key={`${guess.card.name}-${index}`}
+                className={cn(
+                  "grid grid-cols-11 gap-2",
+                  guess.isNew && "animate-in slide-in-from-top-4 duration-300"
+                )}
+              >
+                <div
+                  className={cn(
+                    "flex items-center justify-center",
+                    guess.isNew && "animate-in zoom-in-50 duration-300"
+                  )}
+                >
+                  <img
+                    src={guess.card.imagePath || "/placeholder.svg"}
+                    alt={guess.card.name}
+                    className="w-14 h-auto rounded"
+                  />
+                </div>
+                <HintCell
+                  value={guess.card.packs}
+                  status={guess.hints.packs}
+                  animate={guess.isNew}
+                />
+                <HintCell
+                  value={guess.card.mana}
+                  status={guess.hints.mana}
+                  isNumeric
+                  animate={guess.isNew}
+                />
+                <HintCell
+                  value={classNameMap[guess.card.class] || guess.card.class}
+                  status={guess.hints.class}
+                  animate={guess.isNew}
+                />
+                <HintCell
+                  value={guess.card.attack}
+                  status={guess.hints.attack}
+                  isNumeric
+                  animate={guess.isNew}
+                />
+                <HintCell
+                  value={guess.card.health}
+                  status={guess.hints.health}
+                  isNumeric
+                  animate={guess.isNew}
+                />
+                <HintCell
+                  value={guess.card.type}
+                  status={guess.hints.type}
+                  animate={guess.isNew}
+                />
+                <HintCell
+                  value={guess.card.rarity}
+                  status={guess.hints.rarity}
+                  animate={guess.isNew}
+                />
+                <ArrayHintCell
+                  values={guess.card.keywords}
+                  status={guess.hints.keywords}
+                  animate={guess.isNew}
+                />
+                <ArrayHintCell
+                  values={guess.card.minionType}
+                  status={guess.hints.minionType}
+                  animate={guess.isNew}
+                />
+                <ArrayHintCell
+                  values={guess.card.spellSchool}
+                  status={guess.hints.spellSchool}
+                  animate={guess.isNew}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="text-xs text-muted-foreground flex flex-wrap justify-center gap-4 mt-4">
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 bg-green-500 rounded"></span> 정답
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 bg-red-500 rounded"></span> 오답
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 bg-amber-500 rounded"></span> 높거나 낮음
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-3 h-3 bg-yellow-500 rounded"></span> 부분 일치
+        </span>
       </div>
     </div>
   );
