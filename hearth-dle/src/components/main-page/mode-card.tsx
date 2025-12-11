@@ -2,7 +2,6 @@ import { GameMode } from "@/types/game-mode";
 import { modeNames } from "@/data/mode-info/mode-names";
 
 import Image from "next/image";
-import { FaRegQuestionCircle } from "react-icons/fa";
 
 interface ModeCardProps {
   gameMode: GameMode;

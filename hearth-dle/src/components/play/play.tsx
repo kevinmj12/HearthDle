@@ -11,6 +11,7 @@ import usePlayStore from "@/stores/play-store";
 import Image from "next/image";
 import hearthstone from "@/assets/images/hearthstone.jpg";
 import { hintCellBgColor } from "./hint-cell-bg-color";
+import { HintHeaderCell } from "./hint-header-cell";
 
 function compareArrays(guessed: string[], answer: string[]): THint {
   if (guessed.length === 0 && answer.length === 0) return "correct";
@@ -122,13 +123,14 @@ export function Play() {
         </p>
       </div>
       {isWon ? (
-        <div className="relative flex-col items-center gap-4 p-6 bg-green-500/10 rounded-xl border border-green-500">
+        <div className="flex flex-col items-center gap-4 p-6 bg-green-500/10 rounded-xl border border-green-500">
           <h2 className="text-xl font-bold text-green-500">정답입니다!</h2>
           <Image
             className="object-contain"
             src={answer !== null ? answer.imagePath : hearthstone}
             alt={answer !== null ? answer.name : "이름을 불러올 수 없습니다"}
-            fill
+            width={300}
+            height={300}
           />
           <p className="text-lg font-medium">{answer?.name}</p>
           <button
@@ -152,40 +154,41 @@ export function Play() {
         </div>
       )}
       {guesses.length > 0 && (
-        <div className="w-full overflow-x-auto">
-          <div className="flex flex-col gap-2 min-w-fit">
-            {/* Header */}
-            <div className="grid grid-cols-11 gap-2 text-xs font-medium text-muted-foreground text-center">
-              <div className="p-2">카드</div>
-              <div className="p-2">확장팩</div>
-              <div className="p-2">마나</div>
-              <div className="p-2">직업</div>
-              <div className="p-2">공격력</div>
-              <div className="p-2">체력</div>
-              <div className="p-2">유형</div>
-              <div className="p-2">희귀도</div>
-              <div className="p-2">키워드</div>
-              <div className="p-2">하수인</div>
-              <div className="p-2">주문학파</div>
+        <div className="flex w-[800px] overflow-x-scroll">
+          <div className="flex flex-col gap-2 min-w-fit mx-auto">
+            {/* 헤더 */}
+            <div className="grid grid-cols-11 gap-2 text-xs font-medium text-muted-foreground text-center text-[15px]">
+              <HintHeaderCell name="카드" />
+              <HintHeaderCell name="확장팩" />
+              <HintHeaderCell name="마나" />
+              <HintHeaderCell name="직업" />
+              <HintHeaderCell name="공격" />
+              <HintHeaderCell name="체력" />
+              <HintHeaderCell name="유형" />
+              <HintHeaderCell name="희귀도" />
+              <HintHeaderCell name="키워드" />
+              <HintHeaderCell name="종족" />
+              <HintHeaderCell name="속성" />
             </div>
 
-            {/* Guesses */}
+            {/* 추측한 카드 목록 */}
             {guesses.map((guess, index) => (
               <div
                 key={`${guess.card.name}-${index}`}
                 className={cn(
-                  "grid grid-cols-11 gap-2",
-                  guess.isNew && "animate-in slide-in-from-top-4 duration-300"
+                  "grid grid-cols-11 gap-2 items-center justify-center"
+                  //   guess.isNew && "animate-in slide-in-from-top-4 duration-300"
                 )}
               >
                 <div
                   className={cn(
                     "relative items-center justify-center",
+                    "w-[60px] h-[60px] overflow-hidden",
                     guess.isNew && "animate-in zoom-in-50 duration-300"
                   )}
                 >
                   <Image
-                    className="object-cover object-top"
+                    className="object-cover object-[1.5px_-10px]  scale-160 origin-top"
                     src={guess !== null ? guess.card.imagePath : hearthstone}
                     alt={guess.card.name}
                     fill

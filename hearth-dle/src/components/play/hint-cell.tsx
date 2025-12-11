@@ -23,7 +23,7 @@ export function HintCell({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-2 rounded-lg min-w-[60px] min-h-[60px] text-white font-medium text-sm",
+        "flex flex-col items-center justify-center p-2 rounded-lg w-[60px] h-[60px] text-white font-medium text-sm",
         bgColor,
         animate && "animate-in zoom-in-50 duration-300"
       )}
