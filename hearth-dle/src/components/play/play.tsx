@@ -154,104 +154,107 @@ export function Play() {
         </div>
       )}
       {guesses.length > 0 && (
-        <div className="flex w-[800px] overflow-x-scroll">
-          <div className="flex flex-col gap-2 min-w-fit mx-auto">
-            {/* 헤더 */}
-            <div className="grid grid-cols-11 gap-2 text-xs font-medium text-muted-foreground text-center text-[15px]">
-              <HintHeaderCell name="카드" />
-              <HintHeaderCell name="확장팩" />
-              <HintHeaderCell name="마나" />
-              <HintHeaderCell name="직업" />
-              <HintHeaderCell name="공격" />
-              <HintHeaderCell name="체력" />
-              <HintHeaderCell name="유형" />
-              <HintHeaderCell name="희귀도" />
-              <HintHeaderCell name="키워드" />
-              <HintHeaderCell name="종족" />
-              <HintHeaderCell name="속성" />
-            </div>
+        <div className="flex w-full px-5 justify-center">
+          <div className="flex py-3 overflow-x-scroll [scrollbar-gutter:stable]">
+            <div className="flex flex-col gap-2 min-w-[730px]">
+              {/* 헤더 */}
+              <div className="grid grid-cols-11 gap-2 text-xs font-medium text-muted-foreground text-center text-[15px]">
+                <HintHeaderCell name="카드" />
+                <HintHeaderCell name="확장팩" />
+                <HintHeaderCell name="마나" />
+                <HintHeaderCell name="직업" />
+                <HintHeaderCell name="공격" />
+                <HintHeaderCell name="체력" />
+                <HintHeaderCell name="유형" />
+                <HintHeaderCell name="희귀도" />
+                <HintHeaderCell name="키워드" />
+                <HintHeaderCell name="종족" />
+                <HintHeaderCell name="속성" />
+              </div>
 
-            {/* 추측한 카드 목록 */}
-            {guesses.map((guess, index) => (
-              <div
-                key={`${guess.card.name}-${index}`}
-                className={cn(
-                  "grid grid-cols-11 gap-2 items-center justify-center"
-                  //   guess.isNew && "animate-in slide-in-from-top-4 duration-300"
-                )}
-              >
+              {/* 추측한 카드 목록 */}
+              {guesses.map((guess, index) => (
                 <div
+                  key={`${guess.card.name}-${index}`}
                   className={cn(
-                    "relative items-center justify-center",
-                    "w-[60px] h-[60px] overflow-hidden",
-                    guess.isNew && "animate-in zoom-in-50 duration-300"
+                    "grid grid-cols-11 gap-2 items-center justify-center"
+                    //   guess.isNew && "animate-in slide-in-from-top-4 duration-300"
                   )}
                 >
-                  <Image
-                    className="object-cover object-[1.5px_-10px]  scale-160 origin-top"
-                    src={guess !== null ? guess.card.imagePath : hearthstone}
-                    alt={guess.card.name}
-                    fill
+                  <div
+                    className={cn(
+                      "relative items-center justify-center",
+                      "w-[60px] h-[60px] overflow-hidden",
+                      guess.isNew && "animate-in zoom-in-50 duration-300"
+                    )}
+                  >
+                    <Image
+                      className="object-cover object-[1.5px_-10px]  scale-160 origin-top"
+                      src={guess !== null ? guess.card.imagePath : hearthstone}
+                      alt={guess.card.name}
+                      fill
+                    />
+                  </div>
+                  <HintCell
+                    value={guess.card.packs}
+                    status={guess.hints.packs}
+                    animate={guess.isNew}
+                  />
+                  <HintCell
+                    value={guess.card.mana}
+                    status={guess.hints.mana}
+                    isNumeric
+                    animate={guess.isNew}
+                  />
+                  <HintCell
+                    value={classNameMap[guess.card.class] || guess.card.class}
+                    status={guess.hints.class}
+                    animate={guess.isNew}
+                  />
+                  <HintCell
+                    value={guess.card.attack}
+                    status={guess.hints.attack}
+                    isNumeric
+                    animate={guess.isNew}
+                  />
+                  <HintCell
+                    value={guess.card.health}
+                    status={guess.hints.health}
+                    isNumeric
+                    animate={guess.isNew}
+                  />
+                  <HintCell
+                    value={guess.card.type}
+                    status={guess.hints.type}
+                    animate={guess.isNew}
+                  />
+                  <HintCell
+                    value={guess.card.rarity}
+                    status={guess.hints.rarity}
+                    animate={guess.isNew}
+                  />
+                  <ArrayHintCell
+                    values={guess.card.keywords}
+                    status={guess.hints.keywords}
+                    animate={guess.isNew}
+                  />
+                  <ArrayHintCell
+                    values={guess.card.minionType}
+                    status={guess.hints.minionType}
+                    animate={guess.isNew}
+                  />
+                  <ArrayHintCell
+                    values={guess.card.spellSchool}
+                    status={guess.hints.spellSchool}
+                    animate={guess.isNew}
                   />
                 </div>
-                <HintCell
-                  value={guess.card.packs}
-                  status={guess.hints.packs}
-                  animate={guess.isNew}
-                />
-                <HintCell
-                  value={guess.card.mana}
-                  status={guess.hints.mana}
-                  isNumeric
-                  animate={guess.isNew}
-                />
-                <HintCell
-                  value={classNameMap[guess.card.class] || guess.card.class}
-                  status={guess.hints.class}
-                  animate={guess.isNew}
-                />
-                <HintCell
-                  value={guess.card.attack}
-                  status={guess.hints.attack}
-                  isNumeric
-                  animate={guess.isNew}
-                />
-                <HintCell
-                  value={guess.card.health}
-                  status={guess.hints.health}
-                  isNumeric
-                  animate={guess.isNew}
-                />
-                <HintCell
-                  value={guess.card.type}
-                  status={guess.hints.type}
-                  animate={guess.isNew}
-                />
-                <HintCell
-                  value={guess.card.rarity}
-                  status={guess.hints.rarity}
-                  animate={guess.isNew}
-                />
-                <ArrayHintCell
-                  values={guess.card.keywords}
-                  status={guess.hints.keywords}
-                  animate={guess.isNew}
-                />
-                <ArrayHintCell
-                  values={guess.card.minionType}
-                  status={guess.hints.minionType}
-                  animate={guess.isNew}
-                />
-                <ArrayHintCell
-                  values={guess.card.spellSchool}
-                  status={guess.hints.spellSchool}
-                  animate={guess.isNew}
-                />
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
+
       <div className="text-xs text-muted-foreground flex flex-wrap justify-center gap-4 mt-4">
         <span className="flex items-center gap-1">
           <span
