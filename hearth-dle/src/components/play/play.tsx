@@ -1,36 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { AutocompleteInput } from "./auto-complete-input";
-import { Card } from "@/types/card";
+import { GuessResult, THint } from "@/types/play";
 import cards from "@/data/cards/cards.json";
 import { cn } from "@/lib/utils";
-import { ChevronUp, ChevronDown, Check, Minus } from "lucide-react";
+import { ArrayHintCell } from "./array-hint-cell";
+import { HintCell } from "./hint-cell";
+import usePlayStore from "@/stores/play-store";
+import Image from "next/image";
+import hearthstone from "@/assets/images/hearthstone.jpg";
 
-type HintStatus = "correct" | "wrong" | "higher" | "lower" | "partial";
-
-interface GuessResult {
-  card: Card;
-  hints: {
-    packs: HintStatus;
-    mana: HintStatus;
-    class: HintStatus;
-    attack: HintStatus;
-    health: HintStatus;
-    type: HintStatus;
-    rarity: HintStatus;
-    keywords: HintStatus;
-    minionType: HintStatus;
-    spellSchool: HintStatus;
-  };
-  isNew?: boolean;
-}
-
-function compareArrays(guessed: string[], answer: string[]): HintStatus {
+function compareArrays(guessed: string[], answer: string[]): THint {
   if (guessed.length === 0 && answer.length === 0) return "correct";
   if (guessed.length === 0 || answer.length === 0) return "wrong";
 
-  const guessedSet = new Set(guessed);
+  //   const guessedSet = new Set(guessed);
   const answerSet = new Set(answer);
 
   const allMatch =
@@ -43,110 +28,29 @@ function compareArrays(guessed: string[], answer: string[]): HintStatus {
   return hasPartial ? "partial" : "wrong";
 }
 
-function compareNumbers(
-  guessed: number | null,
-  answer: number | null
-): HintStatus {
+function compareNumbers(guessed: number | null, answer: number | null): THint {
   if (guessed === null && answer === null) return "correct";
   if (guessed === null || answer === null) return "wrong";
   if (guessed === answer) return "correct";
   return guessed < answer ? "higher" : "lower";
 }
 
-function HintCell({
-  value,
-  status,
-  isNumeric = false,
-  animate = false,
-}: {
-  value: string | number | null;
-  status: HintStatus;
-  isNumeric?: boolean;
-  animate?: boolean;
-}) {
-  const bgColor = {
-    correct: "bg-green-500",
-    wrong: "bg-red-500",
-    higher: "bg-amber-500",
-    lower: "bg-amber-500",
-    partial: "bg-yellow-500",
-  }[status];
-
-  const displayValue = value === null ? "-" : value;
-
-  return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center p-2 rounded-lg min-w-[60px] min-h-[60px] text-white font-medium text-sm",
-        bgColor,
-        animate && "animate-in zoom-in-50 duration-300"
-      )}
-    >
-      <span className="text-center break-words">{displayValue}</span>
-      {isNumeric && status === "higher" && <ChevronUp className="w-4 h-4" />}
-      {isNumeric && status === "lower" && <ChevronDown className="w-4 h-4" />}
-      {status === "correct" && <Check className="w-4 h-4" />}
-      {status === "partial" && <Minus className="w-4 h-4" />}
-    </div>
-  );
-}
-
-function ArrayHintCell({
-  values,
-  status,
-  animate = false,
-}: {
-  values: string[];
-  status: HintStatus;
-  animate?: boolean;
-}) {
-  const bgColor = {
-    correct: "bg-green-500",
-    wrong: "bg-red-500",
-    higher: "bg-amber-500",
-    lower: "bg-amber-500",
-    partial: "bg-yellow-500",
-  }[status];
-
-  return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center p-2 rounded-lg min-w-[60px] min-h-[60px] text-white font-medium text-xs",
-        bgColor,
-        animate && "animate-in zoom-in-50 duration-300"
-      )}
-    >
-      {values.length === 0 ? (
-        <span>-</span>
-      ) : (
-        <span className="text-center">{values.join(", ")}</span>
-      )}
-      {status === "correct" && <Check className="w-4 h-4 mt-1" />}
-      {status === "partial" && <Minus className="w-4 h-4 mt-1" />}
-    </div>
-  );
-}
-
 export function Play() {
-  const [answer, setAnswer] = useState<Card | null>(null);
-  const [guesses, setGuesses] = useState<GuessResult[]>([]);
-  const [isWon, setIsWon] = useState(false);
-  const [usedCards, setUsedCards] = useState<Set<string>>(new Set());
+  const {
+    answer,
+    guesses,
+    isWon,
+    usedCards,
+    setAnswer,
+    setGuesses,
+    addGuess,
+    setIsWon,
+    setUsedCards,
+  } = usePlayStore();
 
   useEffect(() => {
     startNewGame();
   }, []);
-
-  useEffect(() => {
-    if (guesses.length > 0 && guesses[0]?.isNew) {
-      const timer = setTimeout(() => {
-        setGuesses((prev) =>
-          prev.map((g, i) => (i === 0 ? { ...g, isNew: false } : g))
-        );
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [guesses]);
 
   const startNewGame = () => {
     const randomIndex = Math.floor(Math.random() * cards.length);
@@ -163,7 +67,8 @@ export function Play() {
     if (!guessedCard) return;
 
     if (usedCards.has(cardName)) return;
-    setUsedCards((prev) => new Set(prev).add(cardName));
+    const newUsedCards = usedCards.add(cardName);
+    setUsedCards(newUsedCards);
 
     const hints: GuessResult["hints"] = {
       packs: guessedCard.packs === answer.packs ? "correct" : "wrong",
@@ -179,7 +84,7 @@ export function Play() {
     };
 
     const newGuess: GuessResult = { card: guessedCard, hints, isNew: true };
-    setGuesses((prev) => [newGuess, ...prev]);
+    addGuess(newGuess);
 
     if (guessedCard.name === answer.name) {
       setIsWon(true);
@@ -219,10 +124,11 @@ export function Play() {
       {isWon ? (
         <div className="flex flex-col items-center gap-4 p-6 bg-green-500/10 rounded-xl border border-green-500">
           <h2 className="text-xl font-bold text-green-500">정답입니다!</h2>
-          <img
-            src={answer?.imagePath || "/placeholder.svg"}
-            alt={answer?.name}
-            className="w-48 rounded-lg shadow-lg"
+          <Image
+            src={answer !== null ? answer.imagePath : hearthstone}
+            alt={answer !== null ? answer.name : "이름을 불러올 수 없습니다"}
+            width={100}
+            height={100}
           />
           <p className="text-lg font-medium">{answer?.name}</p>
           <button
@@ -279,10 +185,11 @@ export function Play() {
                     guess.isNew && "animate-in zoom-in-50 duration-300"
                   )}
                 >
-                  <img
-                    src={guess.card.imagePath || "/placeholder.svg"}
+                  <Image
+                    src={guess !== null ? guess.card.imagePath : hearthstone}
                     alt={guess.card.name}
-                    className="w-14 h-auto rounded"
+                    width={100}
+                    height={100}
                   />
                 </div>
                 <HintCell
