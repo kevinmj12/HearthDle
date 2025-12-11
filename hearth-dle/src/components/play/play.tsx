@@ -10,6 +10,7 @@ import { HintCell } from "./hint-cell";
 import usePlayStore from "@/stores/play-store";
 import Image from "next/image";
 import hearthstone from "@/assets/images/hearthstone.jpg";
+import { hintCellBgColor } from "./hint-cell-bg-color";
 
 function compareArrays(guessed: string[], answer: string[]): THint {
   if (guessed.length === 0 && answer.length === 0) return "correct";
@@ -120,15 +121,14 @@ export function Play() {
           카드 이름을 입력해서 정답 카드를 맞춰보세요!
         </p>
       </div>
-
       {isWon ? (
-        <div className="flex flex-col items-center gap-4 p-6 bg-green-500/10 rounded-xl border border-green-500">
+        <div className="relative flex-col items-center gap-4 p-6 bg-green-500/10 rounded-xl border border-green-500">
           <h2 className="text-xl font-bold text-green-500">정답입니다!</h2>
           <Image
+            className="object-contain"
             src={answer !== null ? answer.imagePath : hearthstone}
             alt={answer !== null ? answer.name : "이름을 불러올 수 없습니다"}
-            width={100}
-            height={100}
+            fill
           />
           <p className="text-lg font-medium">{answer?.name}</p>
           <button
@@ -151,7 +151,6 @@ export function Play() {
           </p>
         </div>
       )}
-
       {guesses.length > 0 && (
         <div className="w-full overflow-x-auto">
           <div className="flex flex-col gap-2 min-w-fit">
@@ -181,15 +180,15 @@ export function Play() {
               >
                 <div
                   className={cn(
-                    "flex items-center justify-center",
+                    "relative items-center justify-center",
                     guess.isNew && "animate-in zoom-in-50 duration-300"
                   )}
                 >
                   <Image
+                    className="object-cover object-top"
                     src={guess !== null ? guess.card.imagePath : hearthstone}
                     alt={guess.card.name}
-                    width={100}
-                    height={100}
+                    fill
                   />
                 </div>
                 <HintCell
@@ -250,19 +249,30 @@ export function Play() {
           </div>
         </div>
       )}
-
       <div className="text-xs text-muted-foreground flex flex-wrap justify-center gap-4 mt-4">
         <span className="flex items-center gap-1">
-          <span className="w-3 h-3 bg-green-500 rounded"></span> 정답
+          <span
+            className={`w-3 h-3 ${hintCellBgColor["correct"]} rounded`}
+          ></span>{" "}
+          정답
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-3 h-3 bg-red-500 rounded"></span> 오답
+          <span
+            className={`w-3 h-3 ${hintCellBgColor["wrong"]} rounded`}
+          ></span>{" "}
+          오답
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-3 h-3 bg-amber-500 rounded"></span> 높거나 낮음
+          <span
+            className={`w-3 h-3 ${hintCellBgColor["higher"]} rounded`}
+          ></span>{" "}
+          높거나 낮음
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-3 h-3 bg-yellow-500 rounded"></span> 부분 일치
+          <span
+            className={`w-3 h-3 ${hintCellBgColor["partial"]} rounded`}
+          ></span>{" "}
+          부분 일치
         </span>
       </div>
     </div>

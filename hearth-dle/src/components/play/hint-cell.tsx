@@ -1,25 +1,22 @@
 import { cn } from "@/lib/utils";
 import { THint } from "@/types/play";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { hintCellBgColor } from "./hint-cell-bg-color";
+
+interface IHintCell {
+  value: string | number | null;
+  status: THint;
+  isNumeric?: boolean;
+  animate?: boolean;
+}
 
 export function HintCell({
   value,
   status,
   isNumeric = false,
   animate = false,
-}: {
-  value: string | number | null;
-  status: THint;
-  isNumeric?: boolean;
-  animate?: boolean;
-}) {
-  const bgColor = {
-    correct: "bg-green-500",
-    wrong: "bg-red-500",
-    higher: "bg-amber-500",
-    lower: "bg-amber-500",
-    partial: "bg-yellow-500",
-  }[status];
+}: IHintCell) {
+  const bgColor = hintCellBgColor[status];
 
   const displayValue = value === null ? "-" : value;
 

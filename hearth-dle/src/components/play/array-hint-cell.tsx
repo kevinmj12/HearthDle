@@ -1,22 +1,19 @@
 import { THint } from "@/types/play";
 import { cn } from "@/lib/utils";
+import { hintCellBgColor } from "./hint-cell-bg-color";
+
+interface IArrayHintCell {
+  values: string[];
+  status: THint;
+  animate?: boolean;
+}
 
 export function ArrayHintCell({
   values,
   status,
   animate = false,
-}: {
-  values: string[];
-  status: THint;
-  animate?: boolean;
-}) {
-  const bgColor = {
-    correct: "bg-green-500",
-    wrong: "bg-red-500",
-    higher: "bg-amber-500",
-    lower: "bg-amber-500",
-    partial: "bg-yellow-500",
-  }[status];
+}: IArrayHintCell) {
+  const bgColor = hintCellBgColor[status];
 
   return (
     <div
